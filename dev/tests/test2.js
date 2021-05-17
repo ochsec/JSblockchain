@@ -1,4 +1,4 @@
-const Blockchain = require('./blockchain');
+const Blockchain = require('../blockchain');
 const coin = new Blockchain();
 
 coin.createNewBlock(789457,'OIUOEDJETH8754DHKD','78SHNEG45DER56');

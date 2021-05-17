@@ -1,0 +1,13 @@
+Blockchain {
+  chain: [
+    {
+      index: 1,
+      timestamp: 1621277823091,
+      transactions: [],
+      nonce: 100,
+      hash: '0',
+      previousBlockHash: '0'
+    }
+  ],
+  pendingTransactions: []
+}
