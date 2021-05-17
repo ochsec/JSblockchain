@@ -1,4 +1,4 @@
 const Blockchain = require('../blockchain');
-const coin = new Blockchain();
+const bc = new Blockchain();
 
-console.log(coin);
+console.log(bc);

@@ -1,5 +1,5 @@
 const Blockchain = require('../blockchain');
-const coin = new Blockchain();
+const bc = new Blockchain();
 const previousBlockHash = '87765DA6CCF0668238C1D27C35692E11';
 const currentBlockData = [
     {
@@ -10,4 +10,4 @@ const currentBlockData = [
 ];
 const nonce = 100;
 
-console.log(coin.hashBlock(previousBlockHash, currentBlockData, nonce));
+console.log(bc.hashBlock(previousBlockHash, currentBlockData, nonce));

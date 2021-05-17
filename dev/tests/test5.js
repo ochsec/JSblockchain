@@ -1,5 +1,5 @@
 const Blockchain = require('../blockchain');
-const coin = new Blockchain();
+const bc = new Blockchain();
 const previousBlockHash = 'OINAIOSDFN09N09ASDNF90N90ASNDF';
 const currentBlockData = [
     {
@@ -19,8 +19,8 @@ const currentBlockData = [
     }
 ];
 
-const nonce = coin.proofOfWork(previousBlockHash, currentBlockData)
+const nonce = bc.proofOfWork(previousBlockHash, currentBlockData)
 
 console.log('nonce: ' + nonce);
 
-console.log('hash with leading zeros: ' + coin.hashBlock(previousBlockHash, currentBlockData, nonce));
+console.log('hash with leading zeros: ' + bc.hashBlock(previousBlockHash, currentBlockData, nonce));
