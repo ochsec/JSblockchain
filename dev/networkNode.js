@@ -47,7 +47,12 @@ app.post('/register-node', function(req, res) {
 });
 
 app.post('/register-nodes-bulk', function(req, res) {
-
+    const allNetworkNodes = req.body.allNetworkNodes;
+    allNetworkNodes.forEach(networkNodeUrl => {
+        if ((bc.networkNodes.indexOf(networkNodeUrl) === -1) && (bc.currentNodeUrl !== networkNodeUrl))
+            bc.networkNodes.push(networkNodeUrl);
+    });
+    res.json({ message: 'Bulk registration successful.' });
 });
 
 app.get('/blockchain', function(req, res) {
