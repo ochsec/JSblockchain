@@ -3,6 +3,7 @@ const app = express();
 const { v4: uuidv4 } = require('uuid');
 const Blockchain = require('./blockchain');
 const bc = new Blockchain();
+const port = process.argv[2];
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -36,5 +37,4 @@ app.get('/mine', function(req, res) {
     });
 });
 
-app.listen(3000, () => console.log('listening on port 3000...'));
-
+app.listen(port, () => console.log(`listening on port ${port}...`));
