@@ -1,12 +1,54 @@
 const express = require('express');
 const app = express();
 const { v4: uuidv4 } = require('uuid');
+const rp = require('request-promise');
 const Blockchain = require('./blockchain');
-const bc = new Blockchain();
-const port = process.argv[2];
+const port = process.argv[3];
+const currentNodeUrl = 'http://localhost:' + port;
+const bc = new Blockchain(currentNodeUrl);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.post('/register-and-broadcast-node', function(req, res) {
+    const newNodeUrl = req.body.newNodeUrl;
+    const regNodesPromises = [];
+    if (bc.networkNodes.indexOf(newNodeUrl) === -1)
+        bc.networkNodes.push(newNodeUrl);
+    bc.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + '/register-node',
+            method: 'POST',
+            body: { newNodeUrl },
+            json: true
+        };
+        regNodesPromises.push(rp(requestOptions));
+    });
+    Promise.all(regNodesPromises)
+        .then(data => {
+            const bulkRegisterOptions = {
+                uri: newNodeUrl + '/register-nodes-bulk',
+                method: 'POST',
+                body: { allNetworkNodes: [...bc.networkNodes, bc.currentNodeUrl] },
+                json: true
+            };
+            return rp(bulkRegisterOptions);
+        })
+        .then(data => {
+            res.json({ message: 'New node registered with network successfully.' });
+        });
+});
+
+app.post('/register-node', function(req, res) {
+    const newNodeUrl = req.body.newNodeUrl;
+    if ((bc.networkNodes.indexOf(newNodeUrl) === -1) && (bc.currentNodeUrl !== newNodeUrl))
+        bc.networkNodes.push(newNodeUrl);
+    res.json({ message: 'New node registered successfully.' });
+});
+
+app.post('/register-nodes-bulk', function(req, res) {
+
+});
 
 app.get('/blockchain', function(req, res) {
     res.send(bc);
