@@ -80,8 +80,9 @@ app.get('/blockchain', function(req, res) {
 });
 
 app.post('/transaction', function(req, res) {
-    const blockIndex = bc.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient);
-    res.json({ message: `Transaction will be added in block ${blockIndex}.`});
+    const newTransaction = req.body;
+    const blockIndex = bc.addTransactionToPendingTransactions(newTransaction);
+    req.json({ message: `Transaction will be added in block ${blockIndex}.` });
 });
 
 app.get('/mine', function(req, res) {
