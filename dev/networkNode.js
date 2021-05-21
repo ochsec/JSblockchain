@@ -95,14 +95,61 @@ app.get('/mine', function(req, res) {
     const nonce = bc.proofOfWork(previousBlockHash, currentBlockData);
     const blockHash = bc.hashBlock(previousBlockHash, currentBlockData, nonce);
     const newBlock = bc.createNewBlock(nonce, previousBlockHash, blockHash);
-    const nodeAddress = uuidv4().split('-').join('');
+    const requestPromises = [];
+    // const nodeAddress = uuidv4().split('-').join('');
 
-    bc.createNewTransaction(12.5, "00", nodeAddress);
-
-    res.json({
-        message: "New block mined successfully!",
-        block: newBlock
+    bc.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + '/receive-new-block',
+            method: 'POST',
+            body: { newBlock },
+            json: true,
+        };
+        requestPromises.push(rp(requestOptions));
     });
+
+    Promise.all(requestPromises)
+    .then(data => {
+        const requestOptions = {
+            uri: bc.currentNodeUrl + '/transaction/broadcast',
+            method: 'POST',
+            body: {
+                amount: 12.5,
+                sender: "00",
+                recipient: nodeAddress,
+            },
+            json: true
+        };
+
+        return rp(requestOptions);
+    })
+    .then(data => {
+        res.json({
+            message: "New block mined successfully!",
+            block: newBlock
+        });
+    });
+});
+
+app.post('/recieve-new-block', function(req, res) {
+    const newBlock = req.body.newBlock;
+    const lastBlock = bc.getLastBlock();
+    const correctHash = lastBlock.hash === newBlock.previousBlockHash;
+    const correctIndex = lastBlock['index'] + 1 === newBlock['index'];
+
+    if (correctHash && correctIndex) {
+        bc.chain.push(newBlock);
+        bc.pendingTransactions = [];
+        res.json({
+            message: 'New block received and accepted.',
+            newBlock,
+        });
+    } else {
+        res.json({
+            message: 'New block rejected',
+            newBlock,
+        });
+    }
 });
 
 app.listen(port, () => console.log(`listening on port ${port}...`));
