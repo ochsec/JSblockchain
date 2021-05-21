@@ -25,18 +25,18 @@ app.post('/register-and-broadcast-node', function(req, res) {
         regNodesPromises.push(rp(requestOptions));
     });
     Promise.all(regNodesPromises)
-        .then(data => {
-            const bulkRegisterOptions = {
-                uri: newNodeUrl + '/register-nodes-bulk',
-                method: 'POST',
-                body: { allNetworkNodes: [...bc.networkNodes, bc.currentNodeUrl] },
-                json: true
-            };
-            return rp(bulkRegisterOptions);
-        })
-        .then(data => {
-            res.json({ message: 'New node registered with network successfully.' });
-        });
+    .then(data => {
+        const bulkRegisterOptions = {
+            uri: newNodeUrl + '/register-nodes-bulk',
+            method: 'POST',
+            body: { allNetworkNodes: [...bc.networkNodes, bc.currentNodeUrl] },
+            json: true
+        };
+        return rp(bulkRegisterOptions);
+    })
+    .then(data => {
+        res.json({ message: 'New node registered with network successfully.' });
+    });
 });
 
 app.post('/register-node', function(req, res) {
@@ -53,6 +53,26 @@ app.post('/register-nodes-bulk', function(req, res) {
             bc.networkNodes.push(networkNodeUrl);
     });
     res.json({ message: 'Bulk registration successful.' });
+});
+
+app.post('/transaction/broadcast', function(req, res) {
+    const newTransaction = bc.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient);
+    bc.addTransactionToPendingTransactions(newTransaction);
+
+    const requestPromises = [];
+    bc.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + '/transaction',
+            method: 'POST',
+            body: newTransaction,
+            json: true,
+        };
+        requestPromises.push(rp(requestOptions));
+    });
+    Promise.all(requestPromises)
+    .then(data => {
+        res.json({ message: 'Transaction created and broadcast successfully.' });
+    })
 });
 
 app.get('/blockchain', function(req, res) {
